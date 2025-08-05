@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizator Kalorii</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍽️</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #ffa500);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .input-section {
+            background: #f8f9ff;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #e3e8ff;
+        }
+
+        .input-section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 120px;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .analyze-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .results-section {
+            background: #fff8f0;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #ffe4cc;
+        }
+
+        .results-section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .total-calories {
+            background: linear-gradient(135deg, #ff6b6b, #ffa500);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .total-calories h3 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .total-calories .number {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        .products-list {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid #eee;
+        }
+
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .product-item:last-child {
+            border-bottom: none;
+        }
+
+        .product-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .product-calories {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        .history-section {
+            grid-column: 1 / -1;
+            background: #f0f8ff;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #d0e7ff;
+            margin-top: 20px;
+        }
+
+        .history-section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .history-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .history-date {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .history-text {
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .history-calories {
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        .clear-history {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .example {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #28a745;
+        }
+
+        .example-title {
+            font-weight: bold;
+            color: #155724;
+            margin-bottom: 8px;
+        }
+
+        .example-text {
+            color: #155724;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍽️ Analizator Kalorii</h1>
+            <p>Opisz co jadłeś w naturalnym języku, a ja policzę kalorie!</p>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <h2>📝 Opisz swoje posiłki</h2>
+                <div class="input-group">
+                    <label for="foodInput">Co jadłeś dzisiaj?</label>
+                    <textarea 
+                        id="foodInput" 
+                        placeholder="Np. dziś jadłem bułkę kajzerkę, dwa plasterki szynki, a na obiad talerz pomidorowej i saszetkę ryżu..."
+                    ></textarea>
+                </div>
+                <button class="analyze-btn" onclick="analyzeFood()">
+                    🔍 Analizuj kalorie
+                </button>
+
+                <div class="example">
+                    <div class="example-title">Przykład:</div>
+                    <div class="example-text">
+                        "Na śniadanie zjadłem dwa jajka sadzone z bułką, na lunch kanapkę z szynką i serem, a na obiad kotlet schabowy z ziemniakami i surówką"
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-section">
+                <h2>📊 Wyniki analizy</h2>
+                <div id="results">
+                    <div style="text-align: center; color: #666; padding: 40px;">
+                        Wprowadź opis posiłków i kliknij "Analizuj kalorie"
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <h2>📚 Historia wpisów</h2>
+            <div id="history">
+                <div style="text-align: center; color: #666; padding: 20px;">
+                    Brak historii wpisów
+                </div>
+            </div>
+            <button class="clear-history" onclick="clearHistory()">🗑️ Wyczyść historię</button>
+        </div>
+    </div>
+
+    <script>
+        // Baza danych produktów z kaloriami (na 100g)
+        const foodDatabase = {
+            // Pieczywo
+            'bułka kajzerka': 250,
+            'bułka': 250,
+            'kajzerka': 250,
+            'chleb': 265,
+            'bagietka': 272,
+            'tost': 265,
+            'bułka grahamka': 230,
+            
+            // Mięso i wędliny
+            'szynka': 145,
+            'plasterk szynki': 30,
+            'plasterek szynki': 30,
+            'kiełbasa': 280,
+            'kotlet schabowy': 250,
+            'kotlet': 250,
+            'schabowy': 250,
+            'kurczak': 165,
+            'pierś kurczaka': 165,
+            'wołowina': 250,
+            'wieprzowina': 242,
+            'boczek': 541,
+            'salami': 336,
+            'mortadela': 311,
+            
+            // Dodatki do kanapek
+            'kanapka z szynką i serem': 400, // specjalna pozycja dla całej kanapki
+            
+            // Nabiał
+            'ser': 350,
+            'ser żółty': 350,
+            'ser biały': 98,
+            'twaróg': 98,
+            'mleko': 42,
+            'jogurt': 61,
+            'masło': 717,
+            'śmietana': 193,
+            'kefir': 41,
+            
+            // Jajka
+            'jajko': 155,
+            'jajka': 155,
+            'jajko sadzone': 196,
+            'jajecznica': 196,
+            
+            // Zupy
+            'zupa pomidorowa': 45,
+            'pomidorowa': 45,
+            'talerz pomidorowej': 135, // ~300ml
+            'żurek': 65,
+            'rosół': 25,
+            'barszcz': 12,
+            'krupnik': 89,
+            'flaki': 87,
+            
+            // Ryż i makarony
+            'ryż': 130,
+            'saszetka ryżu': 130,
+            'makaron': 131,
+            'spaghetti': 131,
+            'kasza': 343,
+            
+            // Warzywa
+            'ziemniaki': 77,
+            'ziemniak': 77,
+            'marchewka': 41,
+            'kapusta': 25,
+            'surówka': 45,
+            'surówka z kapusty': 45,
+            'sałata': 15,
+            'pomidor': 18,
+            'ogórek': 10,
+            'cebula': 40,
+            'papryka': 20,
+            
+            // Owoce
+            'jabłko': 52,
+            'banan': 89,
+            'pomarańcza': 43,
+            'gruszka': 57,
+            'truskawki': 32,
+            
+            // Przekąski
+            'chipsy': 536,
+            'czekolada': 534,
+            'ciastko': 400,
+            'lody': 207,
+            'orzeszki': 567,
+            'batonik': 450,
+            
+            // Napoje
+            'coca cola': 42,
+            'cola': 42,
+            'piwo': 43,
+            'wino': 83,
+            'sok': 45,
+            'herbata': 1,
+            'kawa': 2
+        };
+
+        // Funkcja do rozpoznawania produktów i ilości
+        function extractFoodItems(text) {
+            const items = [];
+            let lowerText = text.toLowerCase(); // Zmieniłem const na let
+            const foundProducts = new Set(); // Śledzenie już znalezionych produktów
+            
+            // Najpierw szukaj specjalnych kombinacji
+            const specialCombinations = [
+                { pattern: /kanapk[ąę]\s+z\s+szynk[ąę]\s+i\s+serem/gi, food: 'kanapka z szynką i serem', calories: 400 },
+                { pattern: /(dwa|dwie|2)\s+jajka\s+sadzone/gi, food: 'jajka sadzone', calories: 186, unit: '2 jajka sadzone' },
+                { pattern: /(trzy|3)\s+jajka\s+sadzone/gi, food: 'jajka sadzone', calories: 279, unit: '3 jajka sadzone' },
+                { pattern: /(jeden|jedno|1)\s+jajko\s+sadzone/gi, food: 'jajko sadzone', calories: 93, unit: '1 jajko sadzone' }
+            ];
+            
+            for (const combo of specialCombinations) {
+                if (lowerText.match(combo.pattern)) {
+                    items.push({ name: `${combo.food} (${combo.unit || 'porcja'})`, calories: combo.calories });
+                    foundProducts.add(combo.food);
+                    // Usuń znaleziony tekst, żeby nie było duplikatów
+                    lowerText = lowerText.replace(combo.pattern, '');
+                }
+            }
+            
+            // Sortuj produkty od najdłuższych do najkrótszych
+            const sortedFoods = Object.keys(foodDatabase).sort((a, b) => b.length - a.length);
+            
+            for (const food of sortedFoods) {
+                // Pomiń jeśli już znaleziono w kombinacjach specjalnych
+                if (foundProducts.has(food)) continue;
+                
+                // Sprawdź czy produkt już został znaleziony jako część dłuższej nazwy
+                const isSubstring = Array.from(foundProducts).some(found => 
+                    found.includes(food) && found !== food
+                );
+                if (isSubstring) continue;
+                
+                // Utwórz regex z granicami słów
+                const foodWords = food.split(/\s+/);
+                let pattern;
+                
+                if (foodWords.length === 1) {
+                    // Pojedyncze słowo - z odmianami
+                    const baseWord = foodWords[0];
+                    if (baseWord === 'bułka') {
+                        pattern = /bułk[ąęi]/gi;
+                    } else if (baseWord === 'szynka') {
+                        pattern = /szynk[ąęi]/gi;
+                    } else if (baseWord === 'ser') {
+                        pattern = /ser(em|u|ze)?/gi;
+                    } else if (baseWord === 'ziemniak') {
+                        pattern = /ziemniak(ami|ów|i)?/gi;
+                    } else if (baseWord === 'surówka') {
+                        pattern = /surówk[ąęi]/gi;
+                    } else if (baseWord === 'jajka') {
+                        pattern = /jajk(a|ami|o)?/gi;
+                    } else if (baseWord === 'kotlet') {
+                        pattern = /kotlet/gi;
+                    } else {
+                        pattern = new RegExp(`\\b${baseWord}`, 'gi');
+                    }
+                } else {
+                    // Wielosłowowe nazwy
+                    pattern = new RegExp(food.replace(/\s+/g, '\\s+'), 'gi');
+                }
+                
+                const matches = lowerText.match(pattern);
+                
+                if (matches) {
+                    foundProducts.add(food);
+                    let quantity = 1;
+                    let unit = 'porcja';
+                    
+                    // Szukaj ilości przed nazwą produktu
+                    const quantityWords = ['jeden', 'jedna', 'jedno', 'dwa', 'dwie', 'trzy', 'cztery', 'pięć'];
+                    const wordToNumber = {
+                        'jeden': 1, 'jedna': 1, 'jedno': 1,
+                        'dwa': 2, 'dwie': 2, 'trzy': 3, 'cztery': 4, 'pięć': 5
+                    };
+                    
+                    // Sprawdź czy jest liczba lub słowo przed produktem
+                    for (const word of quantityWords) {
+                        const qPattern = new RegExp(`\\b${word}\\s+${food}`, 'gi');
+                        if (lowerText.match(qPattern)) {
+                            quantity = wordToNumber[word];
+                            break;
+                        }
+                    }
+                    
+                    // Sprawdź cyfry
+                    const numPattern = new RegExp(`\\b(\\d+)\\s+${food}`, 'gi');
+                    const numMatch = lowerText.match(numPattern);
+                    if (numMatch) {
+                        const num = parseInt(numMatch[0].match(/\d+/)[0]);
+                        quantity = num;
+                    }
+                    
+                    // Oblicz kalorie na podstawie produktu i ilości
+                    let calories;
+                    let displayUnit = unit;
+                    
+                    if (food === 'jajka' || food === 'jajko') {
+                        calories = Math.round(155 * 0.6 * quantity); // 60g na jajko
+                        displayUnit = quantity === 1 ? '1 jajko' : `${quantity} jajka`;
+                    } else if (food === 'jajko sadzone') {
+                        calories = Math.round(196 * 0.6 * quantity);
+                        displayUnit = quantity === 1 ? '1 jajko sadzone' : `${quantity} jajka sadzone`;
+                    } else if (food === 'bułka' || food === 'kajzerka') {
+                        calories = Math.round(250 * 0.8 * quantity); // 80g na bułkę
+                        displayUnit = quantity === 1 ? '1 bułka' : `${quantity} bułki`;
+                    } else if (food === 'ser') {
+                        calories = Math.round(350 * 0.3 * quantity); // 30g sera na porcję
+                        displayUnit = 'porcja na kanapkę';
+                    } else if (food === 'szynka') {
+                        calories = Math.round(145 * 0.4 * quantity); // 40g szynki na porcję
+                        displayUnit = 'porcja na kanapkę';
+                    } else if (food === 'ziemniak') {
+                        calories = Math.round(77 * 2 * quantity); // 200g ziemniaków
+                        displayUnit = 'porcja';
+                    } else if (food === 'surówka') {
+                        calories = Math.round(45 * 1 * quantity); // 100g surówki
+                        displayUnit = 'porcja';
+                    } else if (food === 'kotlet schabowy' || food === 'kotlet' || food === 'schabowy') {
+                        calories = Math.round(250 * 1.2 * quantity); // 120g kotleta
+                        displayUnit = 'porcja';
+                        // Jeśli już mamy kotlet, nie dodawaj duplikatów
+                        const hasKotlet = items.some(item => item.name.includes('kotlet') || item.name.includes('schabowy'));
+                        if (hasKotlet) continue;
+                    } else {
+                        calories = Math.round(foodDatabase[food] * quantity);
+                    }
+                    
+                    items.push({ name: `${food} (${displayUnit})`, calories });
+                }
+            }
+            
+            return items;
+        }
+
+        function analyzeFood() {
+            const input = document.getElementById('foodInput').value.trim();
+            if (!input) {
+                alert('Proszę wprowadzić opis posiłków!');
+                return;
+            }
+
+            const foodItems = extractFoodItems(input);
+            const totalCalories = foodItems.reduce((sum, item) => sum + item.calories, 0);
+
+            displayResults(foodItems, totalCalories);
+            addToHistory(input, foodItems, totalCalories);
+        }
+
+        function displayResults(items, total) {
+            const resultsDiv = document.getElementById('results');
+            
+            if (items.length === 0) {
+                resultsDiv.innerHTML = `
+                    <div style="text-align: center; color: #666; padding: 40px;">
+                        Nie rozpoznano żadnych produktów. Spróbuj użyć innych nazw lub sprawdź przykład.
+                    </div>
+                `;
+                return;
+            }
+
+            const productsHtml = items.map(item => `
+                <div class="product-item">
+                    <span class="product-name">${item.name}</span>
+                    <span class="product-calories">${item.calories} kcal</span>
+                </div>
+            `).join('');
+
+            resultsDiv.innerHTML = `
+                <div class="total-calories">
+                    <h3>Łączna liczba kalorii</h3>
+                    <div class="number">${total}</div>
+                    <div>kcal</div>
+                </div>
+                <div class="products-list">
+                    <h4 style="margin-bottom: 15px; color: #333;">Rozpoznane produkty:</h4>
+                    ${productsHtml}
+                </div>
+            `;
+        }
+
+        // Historia przechowywana w localStorage dla trwałego przechowywania
+        function getHistory() {
+            try {
+                const history = localStorage.getItem('calorieHistory');
+                return history ? JSON.parse(history) : [];
+            } catch (e) {
+                console.error('Błąd odczytu historii:', e);
+                return [];
+            }
+        }
+
+        function saveHistory(history) {
+            try {
+                localStorage.setItem('calorieHistory', JSON.stringify(history));
+            } catch (e) {
+                console.error('Błąd zapisu historii:', e);
+            }
+        }
+
+        function addToHistory(input, items, total) {
+            const entry = {
+                id: Date.now(), // Unikalny identyfikator
+                date: new Date().toLocaleString('pl-PL'),
+                text: input,
+                items: items,
+                total: total
+            };
+            
+            const history = getHistory();
+            history.unshift(entry);
+            
+            // Zachowaj tylko 20 ostatnich wpisów
+            if (history.length > 20) {
+                history.splice(20);
+            }
+            
+            saveHistory(history);
+            displayHistory();
+        }
+
+        function displayHistory() {
+            const historyDiv = document.getElementById('history');
+            const history = getHistory();
+            
+            if (history.length === 0) {
+                historyDiv.innerHTML = `
+                    <div style="text-align: center; color: #666; padding: 20px;">
+                        Brak historii wpisów
+                    </div>
+                `;
+                return;
+            }
+
+            const historyHtml = history.map(entry => `
+                <div class="history-item">
+                    <div class="history-date">${entry.date}</div>
+                    <div class="history-text">"${entry.text}"</div>
+                    <div class="history-calories">Łącznie: ${entry.total} kcal (${entry.items.length} produktów)</div>
+                </div>
+            `).join('');
+
+            historyDiv.innerHTML = historyHtml;
+        }
+
+        function clearHistory() {
+            if (confirm('Czy na pewno chcesz wyczyścić historię?')) {
+                localStorage.removeItem('calorieHistory');
+                displayHistory();
+            }
+        }
+
+        // Inicjalizacja aplikacji
+        window.onload = function() {
+            displayHistory();
+        };
+
+        // Obsługa Enter w textarea
+        document.getElementById('foodInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                analyzeFood();
+            }
+        });
+    </script>
+</body>
+</html>
