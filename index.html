@@ -33,6 +33,7 @@
             color: white;
             padding: 30px;
             text-align: center;
+            position: relative;
         }
 
         .header h1 {
@@ -43,6 +44,28 @@
         .header p {
             font-size: 1.1rem;
             opacity: 0.9;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            padding: 8px 16px;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
         }
 
         .main-content {
@@ -238,6 +261,92 @@
             font-style: italic;
         }
 
+        /* Tryb ciemny */
+        .dark-mode {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .dark-mode .container {
+            background: #2d3748;
+            color: #e2e8f0;
+        }
+
+        .dark-mode .input-section {
+            background: #4a5568;
+            border-color: #718096;
+        }
+
+        .dark-mode .input-section h2 {
+            color: #e2e8f0;
+        }
+
+        .dark-mode label {
+            color: #cbd5e0;
+        }
+
+        .dark-mode textarea {
+            background: #2d3748;
+            border-color: #4a5568;
+            color: #e2e8f0;
+        }
+
+        .dark-mode textarea:focus {
+            border-color: #667eea;
+        }
+
+        .dark-mode .results-section {
+            background: #4a5568;
+            border-color: #718096;
+        }
+
+        .dark-mode .results-section h2 {
+            color: #e2e8f0;
+        }
+
+        .dark-mode .products-list {
+            background: #2d3748;
+            border-color: #4a5568;
+        }
+
+        .dark-mode .product-item {
+            border-bottom-color: #4a5568;
+        }
+
+        .dark-mode .product-name {
+            color: #e2e8f0;
+        }
+
+        .dark-mode .history-section {
+            background: #4a5568;
+            border-color: #718096;
+        }
+
+        .dark-mode .history-section h2 {
+            color: #e2e8f0;
+        }
+
+        .dark-mode .history-item {
+            background: #2d3748;
+            border-left-color: #667eea;
+        }
+
+        .dark-mode .history-text {
+            color: #cbd5e0;
+        }
+
+        .dark-mode .example {
+            background: #2d5016;
+            border-left-color: #38a169;
+        }
+
+        .dark-mode .example-title {
+            color: #68d391;
+        }
+
+        .dark-mode .example-text {
+            color: #9ae6b4;
+        }
+
         @media (max-width: 768px) {
             .main-content {
                 grid-template-columns: 1fr;
@@ -246,12 +355,23 @@
             .header h1 {
                 font-size: 2rem;
             }
+
+            .theme-toggle {
+                top: 15px;
+                right: 15px;
+                padding: 6px 12px;
+                font-size: 12px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <span id="theme-icon">🌙</span>
+                <span id="theme-text">Tryb ciemny</span>
+            </button>
             <h1>🍽️ Analizator Kalorii</h1>
             <p>Opisz co jadłeś w naturalnym języku, a ja policzę kalorie!</p>
         </div>
@@ -657,9 +777,37 @@
             }
         }
 
+        // Funkcje trybu ciemnego
+        function getTheme() {
+            return localStorage.getItem('theme') || 'light';
+        }
+
+        function setTheme(theme) {
+            localStorage.setItem('theme', theme);
+            document.body.className = theme === 'dark' ? 'dark-mode' : '';
+            
+            const themeIcon = document.getElementById('theme-icon');
+            const themeText = document.getElementById('theme-text');
+            
+            if (theme === 'dark') {
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Tryb jasny';
+            } else {
+                themeIcon.textContent = '🌙';
+                themeText.textContent = 'Tryb ciemny';
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = getTheme();
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        }
+
         // Inicjalizacja aplikacji
         window.onload = function() {
             displayHistory();
+            setTheme(getTheme()); // Zastosuj zapisany motyw
         };
 
         // Obsługa Enter w textarea
